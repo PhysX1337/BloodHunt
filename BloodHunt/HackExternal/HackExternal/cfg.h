@@ -40,7 +40,6 @@ inline namespace Configuration
 		int in_LineType = 0;
 		int in_tab_index = 0;
 
-		float max_distance = 150;
 
 	};
 #define CFG Configuration::Settings::Get()

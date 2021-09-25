@@ -71,17 +71,11 @@ auto GameCache()->VOID
 			if (!actor_root)continue;
 
 			auto name = BloodHunt::GetNameFromFName(actor_id);
-			auto actor_teamid = read<uintptr_t>(actor_state + 0x3e0);
-			auto local_teamid = read<uintptr_t>(GameVars.local_player_state + 0x3e0);
 
 			if (actor_pawn == GameVars.local_player_pawn) // Ignore Self?
 				continue;
 
-			if (local_teamid == actor_teamid) // Ignore Team?
-				continue;
-			
-
-			EntityList Entity { };
+			EntityList Entity{ };
 			Entity.actor_pawn = actor_pawn;
 
 			if (name == "TBP_ElysiumPlayer_C" || name == "TBP_Player_C" || name == "TBP_NPC_Primogen_C" || name == "TBP_NPC_C")
@@ -122,105 +116,104 @@ auto RenderVisual()->VOID
 
 		if (CFG.b_Visual)
 		{
-			if (entity_distance < CFG.max_distance)
+
+			if (CFG.b_EspBox)
 			{
-				if (CFG.b_EspBox)
+				if (CFG.in_BoxType == 0)
 				{
-					if (CFG.in_BoxType == 0)
-					{
-						DrawBox(CFG.BoxColor, HeadBox.x - (CornerWidth / 2), HeadBox.y, CornerWidth, CornerHeight);
-					}
-					else if (CFG.in_BoxType == 1)
-					{
-						DrawCorneredBox(HeadBox.x - (CornerWidth / 2), HeadBox.y, CornerWidth, CornerHeight, CFG.BoxColor, 1.5);
-					}
+					DrawBox(CFG.BoxColor, HeadBox.x - (CornerWidth / 2), HeadBox.y, CornerWidth, CornerHeight);
 				}
-				if (CFG.b_EspLine)
+				else if (CFG.in_BoxType == 1)
 				{
-
-					if (CFG.in_LineType == 0)
-					{
-						DrawLine(ImVec2(static_cast<float>(GameVars.ScreenWidth / 2), static_cast<float>(GameVars.ScreenHeight)), ImVec2(BottomBox.x, BottomBox.y), CFG.LineColor, 1.5f); //LINE FROM BOTTOM SCREEN
-					}
-					if (CFG.in_LineType == 1)
-					{
-						DrawLine(ImVec2(static_cast<float>(GameVars.ScreenWidth / 2), 0.f), ImVec2(BottomBox.x, BottomBox.y), CFG.LineColor, 1.5f); //LINE FROM TOP SCREEN
-					}
-					if (CFG.in_LineType == 2)
-					{
-						DrawLine(ImVec2(static_cast<float>(GameVars.ScreenWidth / 2), static_cast<float>(GameVars.ScreenHeight / 2)), ImVec2(BottomBox.x, BottomBox.y), CFG.LineColor, 1.5f); //LINE FROM CROSSHAIR
-					}
-				}
-				if (CFG.b_EspDistance)
-				{
-					char dist[64];
-					sprintf_s(dist, "Dist:%.fm", entity_distance);
-					DrawOutlinedText(Verdana, dist, ImVec2(BottomBox.x, BottomBox.y), 14.0f, ImColor(255, 255, 255), true);
-				}
-				if (CFG.b_EspHealth)
-				{
-					auto Health = read<float>(Entity.actor_pawn + 0x688);
-					auto MaxHealth = read<float>(Entity.actor_pawn + 0x56C); // idk how this works lmao
-					auto procentage = Health * 100 / MaxHealth;
-
-					float width = CornerWidth / 10;
-					if (width < 2.f) width = 2.;
-					if (width > 3) width = 3.;
-
-					HealthBar(HeadBox.x - (CornerWidth / 2) - 7, HeadBox.y, width, BottomBox.y - HeadBox.y, procentage, true);
-				}
-				if (CFG.b_EspSkeleton)
-				{
-
-					Vector3 vHeadOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 28));
-					Vector3 vNeckOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 27));
-					Vector3 vSpine1Out = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 27));
-					Vector3 vSpine2Out = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 25));
-					Vector3 vSpine3Out = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 24));
-					Vector3 vPelvisOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 9));
-					Vector3 vRightThighOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 17));
-					Vector3 vLeftThighOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 10));
-					Vector3 vRightCalfOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 18));
-					Vector3 vLeftCalfOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 11));
-					Vector3 vRightFootOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 19));
-					Vector3 vLeftFootOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 12));
-					Vector3 vUpperArmRightOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 109));
-					Vector3 vUpperArmLeftOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 64));
-					Vector3 vLowerArmRightOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 110));
-					Vector3 vLowerArmLeftOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 65));
-					Vector3 vHandRightOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 111));
-					Vector3 vHandLeftOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 66));
-					Vector3 vFootOutOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 0));
-
-
-					DrawLine(ImVec2(vHeadOut.x, vHeadOut.y), ImVec2(vNeckOut.x, vNeckOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vNeckOut.x, vNeckOut.y), ImVec2(vSpine1Out.x, vSpine1Out.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vSpine2Out.x, vSpine2Out.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vSpine2Out.x, vSpine2Out.y), ImVec2(vSpine3Out.x, vSpine3Out.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vUpperArmRightOut.x, vUpperArmRightOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vUpperArmLeftOut.x, vUpperArmLeftOut.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vPelvisOut.x, vPelvisOut.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vPelvisOut.x, vPelvisOut.y), ImVec2(vRightThighOut.x, vRightThighOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vPelvisOut.x, vPelvisOut.y), ImVec2(vLeftThighOut.x, vLeftThighOut.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vRightThighOut.x, vRightThighOut.y), ImVec2(vRightCalfOut.x, vRightCalfOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vLeftThighOut.x, vLeftThighOut.y), ImVec2(vLeftCalfOut.x, vLeftCalfOut.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vRightCalfOut.x, vRightCalfOut.y), ImVec2(vRightFootOut.x, vRightFootOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vLeftCalfOut.x, vLeftCalfOut.y), ImVec2(vLeftFootOut.x, vLeftFootOut.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vUpperArmRightOut.x, vUpperArmRightOut.y), ImVec2(vLowerArmRightOut.x, vLowerArmRightOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vUpperArmLeftOut.x, vUpperArmLeftOut.y), ImVec2(vLowerArmLeftOut.x, vLowerArmLeftOut.y), CFG.SkeletonColor, 1.5f);
-
-					DrawLine(ImVec2(vLowerArmLeftOut.x, vLowerArmLeftOut.y), ImVec2(vHandLeftOut.x, vHandLeftOut.y), CFG.SkeletonColor, 1.5f);
-					DrawLine(ImVec2(vLowerArmRightOut.x, vLowerArmRightOut.y), ImVec2(vHandRightOut.x, vHandRightOut.y), CFG.SkeletonColor, 1.5f);
-
+					DrawCorneredBox(HeadBox.x - (CornerWidth / 2), HeadBox.y, CornerWidth, CornerHeight, CFG.BoxColor, 1.5);
 				}
 			}
+			if (CFG.b_EspLine)
+			{
+
+				if (CFG.in_LineType == 0)
+				{
+					DrawLine(ImVec2(static_cast<float>(GameVars.ScreenWidth / 2), static_cast<float>(GameVars.ScreenHeight)), ImVec2(BottomBox.x, BottomBox.y), CFG.LineColor, 1.5f); //LINE FROM BOTTOM SCREEN
+				}
+				if (CFG.in_LineType == 1)
+				{
+					DrawLine(ImVec2(static_cast<float>(GameVars.ScreenWidth / 2), 0.f), ImVec2(BottomBox.x, BottomBox.y), CFG.LineColor, 1.5f); //LINE FROM TOP SCREEN
+				}
+				if (CFG.in_LineType == 2)
+				{
+					DrawLine(ImVec2(static_cast<float>(GameVars.ScreenWidth / 2), static_cast<float>(GameVars.ScreenHeight / 2)), ImVec2(BottomBox.x, BottomBox.y), CFG.LineColor, 1.5f); //LINE FROM CROSSHAIR
+				}
+			}
+			if (CFG.b_EspDistance)
+			{
+				char dist[64];
+				sprintf_s(dist, "Dist:%.fm", entity_distance);
+				DrawOutlinedText(Verdana, dist, ImVec2(BottomBox.x, BottomBox.y), 14.0f, ImColor(255, 255, 255), true);
+			}
+			if (CFG.b_EspHealth)
+			{
+				auto Health = read<float>(Entity.actor_pawn + 0x688);
+				auto MaxHealth = read<float>(Entity.actor_pawn + 0x56C); // idk how this works lmao
+				auto procentage = Health * 100 / MaxHealth;
+
+				float width = CornerWidth / 10;
+				if (width < 2.f) width = 2.;
+				if (width > 3) width = 3.;
+
+				HealthBar(HeadBox.x - (CornerWidth / 2) - 7, HeadBox.y, width, BottomBox.y - HeadBox.y, procentage, true);
+			}
+			if (CFG.b_EspSkeleton)
+			{
+
+				Vector3 vHeadOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 28));
+				Vector3 vNeckOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 27));
+				Vector3 vSpine1Out = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 27));
+				Vector3 vSpine2Out = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 25));
+				Vector3 vSpine3Out = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 24));
+				Vector3 vPelvisOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 9));
+				Vector3 vRightThighOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 17));
+				Vector3 vLeftThighOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 10));
+				Vector3 vRightCalfOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 18));
+				Vector3 vLeftCalfOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 11));
+				Vector3 vRightFootOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 19));
+				Vector3 vLeftFootOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 12));
+				Vector3 vUpperArmRightOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 109));
+				Vector3 vUpperArmLeftOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 64));
+				Vector3 vLowerArmRightOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 110));
+				Vector3 vLowerArmLeftOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 65));
+				Vector3 vHandRightOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 111));
+				Vector3 vHandLeftOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 66));
+				Vector3 vFootOutOut = BloodHunt::ProjectWorldToScreen(BloodHunt::GetBoneWithRotation(Entity.actor_mesh, 0));
+
+
+				DrawLine(ImVec2(vHeadOut.x, vHeadOut.y), ImVec2(vNeckOut.x, vNeckOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vNeckOut.x, vNeckOut.y), ImVec2(vSpine1Out.x, vSpine1Out.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vSpine2Out.x, vSpine2Out.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vSpine2Out.x, vSpine2Out.y), ImVec2(vSpine3Out.x, vSpine3Out.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vUpperArmRightOut.x, vUpperArmRightOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vUpperArmLeftOut.x, vUpperArmLeftOut.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vSpine1Out.x, vSpine1Out.y), ImVec2(vPelvisOut.x, vPelvisOut.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vPelvisOut.x, vPelvisOut.y), ImVec2(vRightThighOut.x, vRightThighOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vPelvisOut.x, vPelvisOut.y), ImVec2(vLeftThighOut.x, vLeftThighOut.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vRightThighOut.x, vRightThighOut.y), ImVec2(vRightCalfOut.x, vRightCalfOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vLeftThighOut.x, vLeftThighOut.y), ImVec2(vLeftCalfOut.x, vLeftCalfOut.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vRightCalfOut.x, vRightCalfOut.y), ImVec2(vRightFootOut.x, vRightFootOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vLeftCalfOut.x, vLeftCalfOut.y), ImVec2(vLeftFootOut.x, vLeftFootOut.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vUpperArmRightOut.x, vUpperArmRightOut.y), ImVec2(vLowerArmRightOut.x, vLowerArmRightOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vUpperArmLeftOut.x, vUpperArmLeftOut.y), ImVec2(vLowerArmLeftOut.x, vLowerArmLeftOut.y), CFG.SkeletonColor, 1.5f);
+
+				DrawLine(ImVec2(vLowerArmLeftOut.x, vLowerArmLeftOut.y), ImVec2(vHandLeftOut.x, vHandLeftOut.y), CFG.SkeletonColor, 1.5f);
+				DrawLine(ImVec2(vLowerArmRightOut.x, vLowerArmRightOut.y), ImVec2(vHandRightOut.x, vHandRightOut.y), CFG.SkeletonColor, 1.5f);
+
+			}
 		}
+
 	}
 }
 
@@ -282,7 +275,6 @@ void Render()
 				}
 				ImGui::Checkbox("ESP Distance", &CFG.b_EspDistance);
 				ImGui::Checkbox("ESP HealthBar", &CFG.b_EspHealth);
-				ImGui::SliderFloat("ESP Max Distance", &CFG.max_distance, 0.0f, 300.0f);
 			}
 		}
 		ImGui::PopFont();
@@ -513,7 +505,7 @@ int main()
 		ShowWindow(GetConsoleWindow(), SW_HIDE);
 
 	bool WindowFocus = false;
-	while (WindowFocus == false) 
+	while (WindowFocus == false)
 	{
 		DWORD ForegroundWindowProcessID;
 		GetWindowThreadProcessId(GetForegroundWindow(), &ForegroundWindowProcessID);
